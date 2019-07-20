@@ -203,29 +203,6 @@ struct global_rq {
 
 #ifdef CONFIG_SMP
 /*
- * We add the notion of a root-domain which will be used to define per-domain
- * variables. Each exclusive cpuset essentially defines an island domain by
- * fully partitioning the member cpus from any other cpuset. Whenever a new
- * exclusive cpuset is created, we also create and attach a new root-domain
- * object.
- *
- */
-struct root_domain {
-	atomic_t refcount;
-	atomic_t rto_count;
-	struct rcu_head rcu;
-	cpumask_var_t span;
-	cpumask_var_t online;
-
-	/*
-	 * The "RT overload" flag: it gets set if a CPU has more than
-	 * one runnable RT task.
-	 */
-	cpumask_var_t rto_mask;
-	struct cpupri cpupri;
-};
-
-/*
  * By default the system creates a single root-domain with all cpus as
  * members (mimicking the global state we have today).
  */

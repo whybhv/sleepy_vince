@@ -5,6 +5,7 @@
 #include <linux/stop_machine.h>
 #include <linux/u64_stats_sync.h>
 #include "cpuacct.h"
+#include "cpupri.h"
 
 #ifndef MUQSS_SCHED_H
 #define MUQSS_SCHED_H
@@ -18,6 +19,31 @@
 /* task_struct::on_rq states: */
 #define TASK_ON_RQ_QUEUED	1
 #define TASK_ON_RQ_MIGRATING	2
+
+#ifdef CONFIG_SMP
+/*
+ * We add the notion of a root-domain which will be used to define per-domain
+ * variables. Each exclusive cpuset essentially defines an island domain by
+ * fully partitioning the member cpus from any other cpuset. Whenever a new
+ * exclusive cpuset is created, we also create and attach a new root-domain
+ * object.
+ *
+ */
+struct root_domain {
+	atomic_t refcount;
+	atomic_t rto_count;
+	struct rcu_head rcu;
+	cpumask_var_t span;
+	cpumask_var_t online;
+
+	/*
+	 * The "RT overload" flag: it gets set if a CPU has more than
+	 * one runnable RT task.
+	 */
+	cpumask_var_t rto_mask;
+	struct cpupri cpupri;
+};
+#endif
 
 /*
  * This is the main, per-CPU runqueue data structure.
